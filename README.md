@@ -22,10 +22,17 @@ and install it with:
 
 MORE info about kscript: https://github.com/holgerbrandl/kscript
 
+## Extension or personalization
+### Other places
+The current script has villages interesting for the author. You can change to you town just updating the ids on the **Config** object.
+
+### New Websites
+1. To include new website, create a new class that implement WebSource, e.g. AemetDays
+2. Add a new entry on **Config** object with a new key and the properly Id for your requested place
+3. You should instantiate the new class on *// NOTE: Instantiate your class here* and read the new config on *// NOTE: add your Config entry here*
+
 ## Interesting notes
-Jsoup is an really useful library to manage html:
-Info about Jsoup: https://github.com/jhy/jsoup/
+Jsoup is an really useful library to manage html. Info about Jsoup: https://github.com/jhy/jsoup/
 
-
-Interesting info about courutines:
+Interesting info about corutines:
 https://medium.com/swlh/everything-you-need-to-know-about-kotlin-coroutines-b3d94f2bc982

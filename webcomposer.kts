@@ -15,6 +15,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.io.File
+import java.nio.file.Paths
 
 object Config {
     const val AEMET_KEY = "Aemet"
@@ -22,6 +23,7 @@ object Config {
     const val TU_TIEMPO_KEY = "TuTiempo"
 
     val queries = mapOf<String, List<String>>(
+        // NOTE: To get your weather forecast, just add the ids of you villages/town here
         AEMET_KEY to listOf("laguna-de-duero-id47076", "san-roman-de-hornija-id47150", "ahigal-de-villarino-id37004"),
         TU_TIEMPO_KEY to listOf("valladolid"),
         TIEMPO_KEY to listOf("laguna-de-duero", "san-roman-de-hornija", "ahigal-de-villarino")
@@ -89,7 +91,7 @@ class AemetDays : WebSource() {
 
 class AemetHours : WebSource() {
     override fun saveWebData(id: String): String? {
-        val document = Jsoup.connect(FULL_URL + "horas/" + id).get() // OK response or exception
+        val document = Jsoup.connect(FULL_URL + id).get() // OK response or exception
         val body = document.select("div#contenedor_grafica").first().replaceImgUrls()
         return Iframe(body, document.getHeaders(), "${Config.AEMET_KEY} $id").save("Aemet-hours-" + id + ".html")
     }
@@ -98,7 +100,7 @@ class AemetHours : WebSource() {
 
     companion object {
         const val BASE_URL = "http://www.aemet.es"
-        const val FULL_URL = BASE_URL + "/es/eltiempo/prediccion/municipios/"
+        const val FULL_URL = BASE_URL + "/es/eltiempo/prediccion/municipios/horas/"
     }
 }
 
@@ -168,7 +170,7 @@ class HtmlCreator {
             out.println("<body>")
             sections.forEach {
                 out.println("<div class=\"result\">" +
-                    "<iframe title=\"$it\" src=\"file:///Users/jchernandez/Tutoriales/kotlin/tiempo/$it\" width=\"100%;\">" +
+                    "<iframe title=\"$it\" src=\"file://${Paths.get("").toAbsolutePath().toString()}/$it\" width=\"100%;\">" +
                     "</iframe></div>")
             }
             out.println("</body></html>")
@@ -185,6 +187,7 @@ val aemetHours = AemetHours()
 val tiempoDays = TiempoDays()
 val tiempoHours = TiempoHours()
 val tuTiempo = TuTiempo()
+// NOTE: Instantiate your class here
 
 val webloads = mutableListOf<Deferred<String?>>()
 val htmlContent = mutableListOf<String>()
@@ -202,6 +205,7 @@ runBlocking {  // blocking the main thread waiting for all coroutines results
          Config.queries[Config.TU_TIEMPO_KEY]?.forEach {
              webloads.add(async {tuTiempo.saveWebData(it) })
          }
+         // NOTE: add your Config entry here
          // wating for all results
          htmlContent.addAll(webloads.awaitAll().filterNotNull())
     }

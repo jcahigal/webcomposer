@@ -105,12 +105,7 @@ class AemetHours : WebSource() {
 }
 
 class TiempoDays : WebSource() {
-    /*
-    it has dinamyc load so, or read in several steps (to get headers and content from ajax request) or use seleniium:
-    WebDriver driver = new FirefoxDriver();
-    driver.get("http://stackoverflow.com/");
-    Document doc = Jsoup.parse(driver.getPageSource());
-     */
+    // it has dinamyc load so its read in several steps (to get headers and content from ajax request)
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(BASE_URL + "/" + id + ".html").get() // OK response or exception
 

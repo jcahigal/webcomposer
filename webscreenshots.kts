@@ -15,16 +15,16 @@ import org.openqa.selenium.By
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.Keys
+import org.openqa.selenium.NoSuchElementException
 import org.openqa.selenium.OutputType
 import org.openqa.selenium.TakesScreenshot
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.NoSuchElementException
+import org.openqa.selenium.chrome.ChromeOptions
 import java.io.File
 import java.nio.file.Paths
-import java.sql.Driver
-import javax.imageio.ImageIO
+
 // import javax.imageio.ImageIO
 
 enum class ElementIdentifier {
@@ -78,17 +78,12 @@ object Config {
 class WebSource {
 
     suspend fun saveWebData(resource: Resource): String? {
-        val driver = ChromeDriver()
+        val options = ChromeOptions()
+        options.addArguments("headless") // to run in background and screenshot works better
+        val driver = ChromeDriver(options)
         driver.get(resource.url)
-        //java.lang.Thread.sleep(1000L)
+
         delay(TIME_TO_LOAD)
-        /* zoom
-        val html: WebElement = driver.findElement(By.tagName("html"))
-        html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT))
-        html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT))
-        html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT))
-        java.lang.Thread.sleep(2000L)
-         */
 
         resource.previousClicks.forEach {
             it.getElementWithRetry(driver)?.click()
@@ -98,7 +93,6 @@ class WebSource {
         var ele = resource.data.getElementWithRetry(driver) ?: return null
 
         val screenshot = ele.takeScreenshot(driver)
-        // val screenshot = ele.captureElement(driver)
         driver.quit()
 
         // Copy the element screenshot to disk
@@ -130,32 +124,6 @@ class WebSource {
         return ts.getScreenshotAs(OutputType.FILE)
     }
 
-    /* TODO test
-    private fun WebElement.captureElement(driver: WebDriver): File {
-        // Get entire page screenshot
-        val ts = driver as TakesScreenshot
-        val screenshot = ts.getScreenshotAs(OutputType.FILE)
-        val fullImg = ImageIO.read(screenshot)
-
-        // Get the location of element on the page
-        val point = this.getLocation()
-        // scroll to get the whole element on screen
-        val js = driver as JavascriptExecutor
-        js.executeScript("window.scrollBy(${point.getX()},${point.getY()})")
-
-        // Get width and height of the element
-        val eleWidth = this.getSize().getWidth()
-        val eleHeight = this.getSize().getHeight()
-
-        // Crop the entire page screenshot to get only element screenshot
-        println("${point.getX()} ${point.getY()} $eleWidth $eleHeight")
-        val eleScreenshot = fullImg.getSubimage(point.getX(), point.getY(), eleWidth, eleHeight)
-        ImageIO.write(eleScreenshot, "png", screenshot)
-
-        return ts.getScreenshotAs(OutputType.FILE)
-    }
-     */
-
     suspend private fun ElementId.getElementWithRetry(driver: WebDriver) : WebElement? {
         try {
             return driver.findElement(this.getBy())
@@ -178,7 +146,7 @@ class WebSource {
     }
 
     companion object {
-        const val MARGIN = 10
+        const val MARGIN = 10 // element point is not exactly
         const val TIME_TO_RETRY = 1000L
         const val TIME_TO_LOAD = 2000L
     }
@@ -230,5 +198,4 @@ runBlocking {  // blocking the main thread waiting for all coroutines results
     }
 }
 
-// webSource.end()
 HtmlCreator().createFile(htmlContent.toTypedArray())

@@ -25,8 +25,6 @@ import org.openqa.selenium.chrome.ChromeOptions
 import java.io.File
 import java.nio.file.Paths
 
-// import javax.imageio.ImageIO
-
 enum class ElementIdentifier {
     ID, CLASS, CSS_SELECTOR
 }
@@ -50,9 +48,7 @@ object Config {
     const val TU_TIEMPO_BASE_URL = "https://www.tutiempo.net"
     val TU_TIEMPO_DATA_ID = ElementId(ElementIdentifier.CLASS, "tsl")
     val TU_TIEMPO_CONDITIONS_ID = ElementId(ElementIdentifier.CLASS, "fc-cta-consent")
-    val TU_TIEMPO_COOKIES_ID = ElementId(ElementIdentifier.CSS_SELECTOR,"div#DivAceptarCookies a[href=\"#\"]")
-    // TODO elementId para cookies para TuTiempo
-
+    val TU_TIEMPO_COOKIES_ID = ElementId(ElementIdentifier.CSS_SELECTOR, "div#DivAceptarCookies a[href=\"#\"]")
 
     val queries = listOf(
         Resource(AEMET_BASE_URL + "laguna-de-duero-id47076", "Aemet - Laguna de Duero", AEMET_DATA_ID, emptyList()),
@@ -73,7 +69,6 @@ object Config {
 
     )
 }
-
 
 class WebSource {
 
@@ -102,7 +97,6 @@ class WebSource {
         return fileName
     }
 
-
     suspend private fun WebElement.takeScreenshot(driver: WebDriver): File {
         val ts = driver as TakesScreenshot
 
@@ -124,7 +118,7 @@ class WebSource {
         return ts.getScreenshotAs(OutputType.FILE)
     }
 
-    suspend private fun ElementId.getElementWithRetry(driver: WebDriver) : WebElement? {
+    suspend private fun ElementId.getElementWithRetry(driver: WebDriver): WebElement? {
         try {
             return driver.findElement(this.getBy())
         } catch (nse: NoSuchElementException) {
@@ -177,7 +171,7 @@ class HtmlCreator {
     }
 
     companion object {
-        const val OUTPUT_FILE = "tiempoI.html"
+        const val OUTPUT_FILE = "tiempoS.html"
     }
 }
 

@@ -109,8 +109,8 @@ class TiempoDays : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(BASE_URL + "/" + id + ".html").get() // OK response or exception
 
-        val documentBody = Jsoup.connect(BASE_URL + "/" + id + ".html~ROW_NUMBER_4~").get() // OK response or exception
-        val body = documentBody.select("div.m_table_weather_day").first()
+        //val documentBody = Jsoup.connect(BASE_URL + "/" + id + ".html~ROW_NUMBER_4~").get() // OK response or exception
+        val body = document.select("div.m_table_weather_day").first()
 
         return Iframe(body, document.getHeaders(), "${Config.TIEMPO_KEY} $id").save("Tiempo-days-" + id + ".html")
     }

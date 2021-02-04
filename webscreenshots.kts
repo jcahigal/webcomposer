@@ -71,10 +71,14 @@ object Config {
 }
 
 class WebSource {
+    val options = ChromeOptions()
+
+    init {
+        options.addArguments("headless") // to run in background and screenshot works better
+    }
 
     suspend fun saveWebData(resource: Resource): String? {
-        val options = ChromeOptions()
-        options.addArguments("headless") // to run in background and screenshot works better
+
         val driver = ChromeDriver(options)
         driver.get(resource.url)
 

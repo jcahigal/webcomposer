@@ -77,7 +77,7 @@ abstract class WebSource {
 class AemetDays : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(FULL_URL + id).get() // OK response or exception
-        val body = document.select("div#tabla_con_scroll").first().replaceImgUrls()
+        val body = document.select("div#tabla_con_scroll").first()?.replaceImgUrls() ?: return null
         return Iframe(body, document.getHeaders(), "${Config.AEMET_KEY} $id").save("Aemet-days-" + id + ".html")
     }
 
@@ -92,7 +92,7 @@ class AemetDays : WebSource() {
 class AemetHours : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(FULL_URL + id).get() // OK response or exception
-        val body = document.select("div#contenedor_grafica").first().replaceImgUrls()
+        val body = document.select("div#contenedor_grafica").first()?.replaceImgUrls() ?: return null
         return Iframe(body, document.getHeaders(), "${Config.AEMET_KEY} $id").save("Aemet-hours-" + id + ".html")
     }
 
@@ -109,8 +109,8 @@ class TiempoDays : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(BASE_URL + "/" + id + ".html").get() // OK response or exception
 
-        //val documentBody = Jsoup.connect(BASE_URL + "/" + id + ".html~ROW_NUMBER_4~").get() // OK response or exception
-        val body = document.select("div.m_table_weather_day").first()
+        // sometimes the response is returned on ajax request, others on the main request
+        val body = document.select("div.m_table_weather_day").first() ?: Jsoup.connect(BASE_URL + "/" + id + ".html~ROW_NUMBER_4~").get() ?: return null
 
         return Iframe(body, document.getHeaders(), "${Config.TIEMPO_KEY} $id").save("Tiempo-days-" + id + ".html")
     }
@@ -125,7 +125,7 @@ class TiempoDays : WebSource() {
 class TiempoHours : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(BASE_URL + "/" + id + ".html?v=por_hora").get() // OK response or exception
-        val body = document.select("ul.m_table_weather_hour").first()
+        val body = document.select("ul.m_table_weather_hour").first() ?: return null
         return Iframe(body, document.getHeaders(), "${Config.TIEMPO_KEY} $id").save("Tiempo-hours-" + id + ".html")
     }
 
@@ -139,7 +139,7 @@ class TiempoHours : WebSource() {
 class TuTiempo : WebSource() {
     override fun saveWebData(id: String): String? {
         val document = Jsoup.connect(BASE_URL + "/" + id + ".html?datos=calendario").get() // OK response or exception
-        val body = document.select("table.tsl").first()
+        val body = document.select("table.tsl").first() ?: return null
         return Iframe(body, document.getHeaders(), "${Config.TU_TIEMPO_KEY} $id").save("TuTiempo-" + id + ".html")
     }
 

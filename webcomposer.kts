@@ -41,11 +41,20 @@ abstract class WebSource {
         val headers = mutableListOf<Element>()
         headers.addAll(this.select("head > link[rel=stylesheet]"))
         headers.forEach {
-            if(!it.attr("href").startsWith("http", true)) {
-                it.attr("href", getBaseUrl() + it.attr("href"))
+            if(it.attr("href") != "") {
+                it.attr("href", it.attr("abs:href")) // complete the whole url
             }
         }
         headers.addAll(this.select("head > style"))
+
+        val jsHeaders = mutableListOf<Element>()
+        jsHeaders.addAll(this.select("head > script"))
+        jsHeaders.forEach {
+            if(it.attr("src") != "") {
+                it.attr("src", it.attr("abs:src"))  // complete the whole url
+            }
+        }
+        headers.addAll(jsHeaders)
 
         val iFrameStyle = Element("style").append(".iframe_title    {padding: 2 0; margin: 0; width: 100%; " +
             "background-color: #95B6E9; color: black; font-weight: bold; text-align: center; display: block}")

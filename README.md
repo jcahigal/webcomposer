@@ -47,3 +47,8 @@ To work with screenshot, Selenium (with ChromeDriver) has been chosen. The behav
 
 Interesting info about corutines:
 https://medium.com/swlh/everything-you-need-to-know-about-kotlin-coroutines-b3d94f2bc982
+
+Interesting info about chromedriver:
+To install, you could donwload the same version than your current chrome here: https://chromedriver.storage.googleapis.com/index.html
+In my case, I choose chromedriver_mac64.zip and it should override the previous version, to ease this process I move this file to ~/ejecutables/chromedriver.
+This works due to there is symbolic link in /usr/local/bin.

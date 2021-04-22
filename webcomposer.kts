@@ -40,6 +40,7 @@ abstract class WebSource {
     fun Document.getHeaders() : List<Element> {
         val headers = mutableListOf<Element>()
         headers.addAll(this.select("head > link[rel=stylesheet]"))
+        headers.addAll(this.select("head > link[rel=stylesheet preload]"))
         headers.forEach {
             if(it.attr("href") != "") {
                 it.attr("href", it.attr("abs:href")) // complete the whole url

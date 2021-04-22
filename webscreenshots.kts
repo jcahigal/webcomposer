@@ -29,7 +29,7 @@ enum class ElementIdentifier {
     ID, CLASS, CSS_SELECTOR
 }
 
-data class ElementId(val elementIdType: ElementIdentifier, val elementIdValue: String, val required: Boolean = false)
+data class ElementId(val elementIdType: ElementIdentifier, val elementIdValue: String, val required: Boolean = false, val jsClick: Boolean = false)
 
 data class Resource(val url: String, val desc: String?, val data: ElementId, val previousClicks: List<ElementId>)
 
@@ -44,11 +44,13 @@ object Config {
     val EL_TIEMPO_DATA_ID = ElementId(ElementIdentifier.CLASS, "m_table_weather_day")
     val EL_TIEMPO_HOURS_DATA_ID = ElementId(ElementIdentifier.CLASS, "m_table_weather_hour")
     val EL_TIEMPO_COOKIES_ID = ElementId(ElementIdentifier.ID, "didomi-notice-agree-button")
+    val EL_TIEMPO_RAIN_ALERT_ID = ElementId(ElementIdentifier.CLASS, "m_pss_alert-close", false, true)
+    val EL_TIEMPO_PREVIOUS_CLICKS = listOf(EL_TIEMPO_COOKIES_ID, EL_TIEMPO_RAIN_ALERT_ID)
 
     const val TU_TIEMPO_BASE_URL = "https://www.tutiempo.net"
     val TU_TIEMPO_DATA_ID = ElementId(ElementIdentifier.CLASS, "tsl")
     val TU_TIEMPO_CONDITIONS_ID = ElementId(ElementIdentifier.CLASS, "fc-cta-consent")
-    val TU_TIEMPO_COOKIES_ID = ElementId(ElementIdentifier.CSS_SELECTOR, "div#DivAceptarCookies a[href=\"#\"]")
+    val TU_TIEMPO_COOKIES_ID = ElementId(ElementIdentifier.ID, "didomi-notice-agree-button")
 
     val queries = listOf(
         Resource(AEMET_BASE_URL + "laguna-de-duero-id47076", "Aemet - Laguna de Duero", AEMET_DATA_ID, emptyList()),
@@ -57,12 +59,12 @@ object Config {
         Resource(AEMET_HOURS_BASE_URL + "laguna-de-duero-id47076", "Aemet (horas) - Laguna de Duero", AEMET_HOURS_DATA_ID, emptyList()),
         Resource(AEMET_HOURS_BASE_URL + "san-roman-de-hornija-id47150", "Aemet (horas) - San Roman de Hornija", AEMET_HOURS_DATA_ID, emptyList()),
         Resource(AEMET_HOURS_BASE_URL + "ahigal-de-villarino-id37004", "Aemet (horas) - Ahigal de Villarino", AEMET_HOURS_DATA_ID, emptyList()),
-        Resource(EL_TIEMPO_BASE_URL + "/laguna-de-duero.html", "El Tiempo - Laguna de Duero", EL_TIEMPO_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
-        Resource(EL_TIEMPO_BASE_URL + "/san-roman-de-hornija.html", "El Tiempo - San Roman de Hornija", EL_TIEMPO_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
-        Resource(EL_TIEMPO_BASE_URL + "/ahigal-de-villarino.html", "El Tiempo - Ahigal de Villarino", EL_TIEMPO_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
-        Resource(EL_TIEMPO_BASE_URL + "/laguna-de-duero.html?v=por_hora", "El Tiempo (horas) - Laguna de Duero", EL_TIEMPO_HOURS_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
-        Resource(EL_TIEMPO_BASE_URL + "/san-roman-de-hornija.html?v=por_hora", "El Tiempo (horas) - San Roman de Hornija", EL_TIEMPO_HOURS_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
-        Resource(EL_TIEMPO_BASE_URL + "/ahigal-de-villarino.html?v=por_hora", "El Tiempo (horas) - Ahigal de Villarino", EL_TIEMPO_HOURS_DATA_ID, listOf(EL_TIEMPO_COOKIES_ID)),
+        Resource(EL_TIEMPO_BASE_URL + "/laguna-de-duero.html", "El Tiempo - Laguna de Duero", EL_TIEMPO_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
+        Resource(EL_TIEMPO_BASE_URL + "/san-roman-de-hornija.html", "El Tiempo - San Roman de Hornija", EL_TIEMPO_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
+        Resource(EL_TIEMPO_BASE_URL + "/ahigal-de-villarino.html", "El Tiempo - Ahigal de Villarino", EL_TIEMPO_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
+        Resource(EL_TIEMPO_BASE_URL + "/laguna-de-duero.html?v=por_hora", "El Tiempo (horas) - Laguna de Duero", EL_TIEMPO_HOURS_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
+        Resource(EL_TIEMPO_BASE_URL + "/san-roman-de-hornija.html?v=por_hora", "El Tiempo (horas) - San Roman de Hornija", EL_TIEMPO_HOURS_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
+        Resource(EL_TIEMPO_BASE_URL + "/ahigal-de-villarino.html?v=por_hora", "El Tiempo (horas) - Ahigal de Villarino", EL_TIEMPO_HOURS_DATA_ID, EL_TIEMPO_PREVIOUS_CLICKS),
         Resource(TU_TIEMPO_BASE_URL + "/valladolid.html?datos=calendario", "Tu Tiempo - Valladolid", TU_TIEMPO_DATA_ID, listOf(TU_TIEMPO_CONDITIONS_ID, TU_TIEMPO_COOKIES_ID))
 
         // NOTE: To get your weather forecast, just add the ids of you villages/town here
@@ -85,8 +87,15 @@ class WebSource {
         delay(TIME_TO_LOAD)
 
         resource.previousClicks.forEach {
-            it.getElementWithRetry(driver)?.click()
-            delay(TIME_TO_LOAD)
+            if(it.jsClick) {
+                val jse = driver as JavascriptExecutor
+                it.getElementWithRetry(driver)?.let {
+                    jse.executeScript("arguments[0].click()", it);
+                }
+            } else {
+                it.getElementWithRetry(driver)?.click()
+                delay(TIME_TO_LOAD)
+            }
         }
 
         var ele = resource.data.getElementWithRetry(driver) ?: return null
